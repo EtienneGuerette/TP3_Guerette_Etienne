@@ -17,6 +17,14 @@ type Query {
       "Filters by name. Accepts SQL LIKE wildcards `%` and `_`."
       name: String @where(operator: "like")
     ): [User!]! @paginate(defaultCount: 10)
+
+    film(id: ID! @eq): Film! @find
+    films(
+        keyword: String @where(key: "title", key: "description", operator: "like"),
+        release_year: Int @where(key: "release_year", operator: ">="),
+        length_min: Int @where(key: "length", operator: ">="),
+        length_max: Int @where(key: "length", operator: "<="),
+    ): [Film] @paginate(defaultCount: 10)
 }
 
 "Account of a person who uses this application."
@@ -38,4 +46,40 @@ type User {
 
     "When the account was last updated."
     updated_at: DateTime!
+}
+
+type Film {
+    id: ID!
+    title: String!
+    release_year: Int
+    length: Int
+    description: String
+    rating: String
+    special_features: [String]
+    image: String
+    language: Language @belongsTo
+    critics: [Critic] @hasMany
+    actors: [Actor] @belongsToMany
+}
+
+type Critic {
+    id: ID!
+    score: Int
+    comment: String
+    user: User @belongsTo
+    film: Film @belongsTo
+}
+
+type Language {
+    id: ID!
+    name: String!
+    films: [Film] @hasMany
+}
+
+type Actor {
+    id: ID!
+    last_name: String!
+    first_name: String!
+    birthdate: DateTime
+    films: [Film] @belongsToMany
 }
