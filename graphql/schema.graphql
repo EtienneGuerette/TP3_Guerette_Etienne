@@ -24,7 +24,23 @@ type Query {
         release_year: Int @where(key: "release_year", operator: ">="),
         length_min: Int @where(key: "length", operator: ">="),
         length_max: Int @where(key: "length", operator: "<="),
-    ): [Film] @paginate(defaultCount: 10)
+    ): [Film!]! @paginate(defaultCount: 10)
+
+    me: User @auth
+}
+
+type CreateCriticInput {
+    score: Int!
+    comment: String
+    film: CreateAFilmBelongsTo!
+}
+
+input CreateAFilmBelongsTo {
+    connect: ID
+}
+
+type Mutation {
+    createCritic(input: CreateCriticInput! @spread): Critic! @create @guard @inject(context: "user.id", name: "user_id")
 }
 
 "Account of a person who uses this application."
@@ -32,8 +48,8 @@ type User {
     "Unique primary key."
     id: ID!
 
-    "Non-unique name."
-    name: String!
+    first_name: String!
+    last_name: String!
 
     "Unique email address."
     email: String!
@@ -46,6 +62,8 @@ type User {
 
     "When the account was last updated."
     updated_at: DateTime!
+
+    critics: [Critic] @hasMany
 }
 
 type Film {
